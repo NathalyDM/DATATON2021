@@ -51,9 +51,6 @@ res.cox <- coxph(Surv(Mes, statu) ~ avance+temperatura, data =  vacunados_dep_me
 summary(res.cox)
 ```
 
-
-## Implementación de Modelo SEIRD EN Python
-
 ## Implementación de Modelo SEIRD EN Python
 
 ### Librerías empleadas
@@ -119,9 +116,10 @@ Entry format is described as follows:
 
 
 
-## Adding Steps
+## Simulación
 
-Use the `@step` decorator. The main loop passes in the master file list and [jinja2][j2] environment.
+![newplot](https://user-images.githubusercontent.com/40121093/131431639-81a26bb1-8176-4ef4-af43-61dd9661e806.png)
+
 
 ## Referencias 
 Pandey, Gaurav. (2020). SEIR and Regression Model-based COVID-19 outbreak predictions in India (Preprint). 10.2196/preprints.19406. 
