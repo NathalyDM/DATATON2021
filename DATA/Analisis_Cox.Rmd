@@ -1,0 +1,127 @@
+---
+title: "Untitled"
+author: "Ferreyra"
+date: "20/8/2021"
+output: html_document
+---
+{r}
+library("survival")
+library("survminer")
+
+
+
+{r}
+vacunados_dep_mes <- read.csv("C:/Users/miguel/Downloads/vacunados_dep_mes.csv")
+median(vacunados_dep_mes$Vacunados)
+
+datadataton <- read.csv("C:/Users/miguel/Downloads/datadataton.csv")
+vacunados_dep_mes$car_por_sup<-0
+
+for ( i in 1:nrow(vacunados_dep_mes)){
+  for (j in 1:nrow(datadataton)){
+    if (datadataton$DEPARTAMENTO[j]==vacunados_dep_mes$Departamento[i]){
+      vacunados_dep_mes$car_por_sup[i]<-datadataton$carre_por_super[j]
+    }
+  }
+}
+
+
+vacunados_dep_mes$statu<-1
+for (i in 1:nrow(vacunados_dep_mes)){
+    if (vacunados_dep_mes$Vacunados[i]>29733){
+      vacunados_dep_mes$statu[i]<-0
+    }
+}
+
+
+
+
+{r}
+data.dataton...Hoja.4 <- read.csv("C:/Users/miguel/Downloads/data dataton - Hoja 4.csv")
+vacunados_dep_mes$temperatura<-0
+vacunados_dep_mes$avance<-0
+
+for ( i in 1:nrow(vacunados_dep_mes)){
+  for (j in 1:nrow(data.dataton...Hoja.4)){
+    if (data.dataton...Hoja.4$Departamento[j]==vacunados_dep_mes$Departamento[i] & data.dataton...Hoja.4$Mes[j]==vacunados_dep_mes$Mes[i] ){
+      vacunados_dep_mes$temperatura[i]<-data.dataton...Hoja.4$Temperaturas[j]
+      vacunados_dep_mes$avance[i]<-data.dataton...Hoja.4$Avance[j]
+    }
+  }
+}
+
+
+{r}
+covariates <- c("car_por_sup", "temperatura", "avance")
+univ_formulas <- sapply(covariates,
+                        function(x) as.formula(paste('Surv(Mes, statu)~', x)))
+                        
+univ_models <- lapply( univ_formulas, function(x){coxph(x, data =  vacunados_dep_mes)})
+# Extract data 
+univ_results <- lapply(univ_models,
+                       function(x){ 
+                          x <- summary(x)
+                          p.value<-signif(x$wald["pvalue"], digits=2)
+                          wald.test<-signif(x$wald["test"], digits=2)
+                          beta<-signif(x$coef[1], digits=2);#coeficient beta
+                          HR <-signif(x$coef[2], digits=2);#exp(beta)
+                          HR.confint.lower <- signif(x$conf.int[,"lower .95"], 2)
+                          HR.confint.upper <- signif(x$conf.int[,"upper .95"],2)
+                          HR <- paste0(HR, " (", 
+                                       HR.confint.lower, "-", HR.confint.upper, ")")
+                          res<-c(beta, HR, wald.test, p.value)
+                          names(res)<-c("beta", "HR (95% CI for HR)", "wald.test", 
+                                        "p.value")
+                          return(res)
+                          #return(exp(cbind(coef(x),confint(x))))
+                         })
+res <- t(as.data.frame(univ_results, check.names = FALSE))
+as.data.frame(res)
+
+
+{r}
+res.cox <- coxph(Surv(Mes, statu) ~ avance+temperatura, data =  vacunados_dep_mes)
+summary(res.cox)
+
+
+{r}
+vacunados_dep_mes$score<-0
+vacunados_dep_mes$grupo<-0
+for(i in 1:nrow(vacunados_dep_mes)){
+  vacunados_dep_mes$score[i]<-vacunados_dep_mes$avance[i]*11.14-4.676e-03*vacunados_dep_mes$temperatura[i]}
+
+mediana<-median(vacunados_dep_mes$score)
+
+for(i in 1:nrow(vacunados_dep_mes)){
+  if (vacunados_dep_mes$score[i]>mediana){
+    vacunados_dep_mes$grupo[i]<-1
+  }
+}
+
+
+{r}
+library(prodlim)
+aj<-prodlim(Hist(as.numeric(Mes),as.numeric(statu))~statu, data=vacunados_dep_mes)
+plot(aj, cause=1)
+aj
+
+
+
+{r}
+m$score<-0
+m$grupo_riesgo<-0
+for(i in 1:nrow(m)){
+  m$score[i]<-m$HOXB6[i]*coeficientes[1]+m$HOXB5[i]*coeficientes[2]+m$HOXB7[i]*coeficientes[3]+m$CINP[i]*coeficientes[4]
+}
+
+mediana<-median(m$score)
+
+for(i in 1:nrow(m)){
+  if (m$score[i]>mediana){
+    m$grupo_riesgo[i]<-1
+  }
+}
+
+
+{r}
+write.table(x=vacunados_dep_mes,sep = "\t", file="C:/Users/Miguel/Desktop/NSCLC/gaaa")
